@@ -1,0 +1,17 @@
+from kombu import Connection, Exchange, Queue, Consumer
+
+rabbit_url = "amqp://localhost:5672/"
+
+conn = Connection(rabbit_url)
+
+exchange = Exchange("Example-exchange-test1", type="direct")
+
+queue = Queue(name="Example-queue-test1", exchange=exchange, routing_key="BOB")
+
+def process_message(body, message):
+    print("The body is {}".format(body))
+    message.ack()
+
+with Consumer(conn, queues=queue, callbacks=[process_message], accept=["text/plain"]):
+    conn.drain_events(timeout=2)
+
